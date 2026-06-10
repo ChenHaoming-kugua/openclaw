@@ -1,22 +1,64 @@
-<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
   <defs>
-    <linearGradient id="lobster-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff4d4d"/>
-      <stop offset="100%" stop-color="#991b1b"/>
+    <!-- 国药集团品牌色（精准还原） -->
+    <linearGradient id="lobster-body" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF4A3A"/>
+      <stop offset="100%" stop-color="#FFA654"/>
+    </linearGradient>
+    <linearGradient id="lobster-tail" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A45"/>
+      <stop offset="100%" stop-color="#FFB76B"/>
     </linearGradient>
   </defs>
-  <!-- Body -->
-  <path d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 C55 100 60 102 65 100 L65 110 L75 110 L75 100 C90 95 105 75 105 55 C105 35 90 10 60 10Z" fill="url(#lobster-gradient)"/>
-  <!-- Left Claw -->
-  <path d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z" fill="url(#lobster-gradient)"/>
-  <!-- Right Claw -->
-  <path d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z" fill="url(#lobster-gradient)"/>
-  <!-- Antenna -->
-  <path d="M45 15 Q35 5 30 8" stroke="#ff4d4d" stroke-width="3" stroke-linecap="round"/>
-  <path d="M75 15 Q85 5 90 8" stroke="#ff4d4d" stroke-width="3" stroke-linecap="round"/>
-  <!-- Eyes -->
-  <circle cx="45" cy="35" r="6" fill="#050810"/>
-  <circle cx="75" cy="35" r="6" fill="#050810"/>
-  <circle cx="46" cy="34" r="2.5" fill="#00e5cc"/>
-  <circle cx="76" cy="34" r="2.5" fill="#00e5cc"/>
+
+  <!-- 背景波浪（国药集团标志精准复刻，从后往前绘制） -->
+  <path d="M80 60 C130 60 170 60 200 60 C230 60 270 60 320 60 C340 70 350 85 330 110 C300 95 260 85 200 90 C140 85 100 95 70 110 C50 85 60 70 80 60Z" fill="#4A5CAD"/>
+  <path d="M90 100 C140 110 170 120 200 115 C230 120 260 110 310 100 C330 115 340 135 315 160 C285 145 250 135 200 140 C150 135 115 145 85 160 C60 135 70 115 90 100Z" fill="#63B446"/>
+  <path d="M110 170 C150 180 180 190 200 185 C220 190 250 180 290 170 C310 185 320 205 295 230 C265 215 230 205 200 210 C170 205 135 215 105 230 C80 205 90 185 110 170Z" fill="#34B9AC"/>
+  <path d="M130 240 C160 250 185 260 200 255 C215 260 240 250 270 240 C290 255 300 275 275 300 C245 285 215 275 200 280 C185 275 155 285 125 300 C100 275 110 255 130 240Z" fill="#3A98D4"/>
+
+  <!-- 龙虾（主体，层级在波浪上方，精准还原原图比例） -->
+  <!-- 身体分节 -->
+  <ellipse cx="200" cy="210" rx="55" ry="70" fill="url(#lobster-body)"/>
+  <path d="M145 190 Q200 175 255 190 Q255 200 200 205 Q145 200 145 190Z" fill="#FF3A2A"/>
+  <path d="M155 220 Q200 205 245 220 Q245 230 200 235 Q155 230 155 220Z" fill="#FF3A2A"/>
+  <path d="M165 250 Q200 235 235 250 Q235 260 200 265 Q165 260 165 250Z" fill="#FF3A2A"/>
+  <!-- 尾巴 -->
+  <path d="M165 270 Q145 300 180 310 Q200 320 220 310 Q255 300 235 270 Q200 290 165 270Z" fill="url(#lobster-tail)"/>
+
+  <!-- 左钳子 -->
+  <path d="M100 130 Q70 160 100 200 Q130 210 160 180 Q175 145 140 125 Q110 115 100 130Z" fill="#FF4A3A"/>
+  <path d="M110 140 L160 175 Q170 185 165 195 L120 185 Q110 175 110 140Z" fill="#FF3A2A"/>
+  <ellipse cx="115" cy="150" rx="7" ry="10" fill="#FF9A8A" opacity="0.7"/>
+  <!-- 右钳子 -->
+  <path d="M300 130 Q330 160 300 200 Q270 210 240 180 Q225 145 260 125 Q290 115 300 130Z" fill="#FF4A3A"/>
+  <path d="M290 140 L240 175 Q230 185 235 195 L280 185 Q290 175 290 140Z" fill="#FF3A2A"/>
+
+  <!-- 龙虾腿 -->
+  <path d="M145 195 L105 215" stroke="#FF4A3A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M140 225 L100 235" stroke="#FF4A3A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M150 255 L110 265" stroke="#FF4A3A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M255 195 L295 215" stroke="#FF4A3A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M260 225 L300 235" stroke="#FF4A3A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M250 255 L290 265" stroke="#FF4A3A" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- 触角 -->
+  <path d="M180 130 Q160 95 145 85" stroke="#FF4A3A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M220 130 Q240 95 255 85" stroke="#FF4A3A" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- 眼睛（和原图一致的卡通风格） -->
+  <circle cx="180" cy="160" r="13" fill="#FFFFFF"/>
+  <circle cx="220" cy="160" r="13" fill="#FFFFFF"/>
+  <circle cx="180" cy="160" r="7" fill="#2D1B14"/>
+  <circle cx="220" cy="160" r="7" fill="#2D1B14"/>
+  <circle cx="183" cy="157" r="3" fill="#FFFFFF"/>
+  <circle cx="223" cy="157" r="3" fill="#FFFFFF"/>
+  <circle cx="180" cy="145" r="5" fill="#5A2A1A"/>
+  <circle cx="220" cy="145" r="5" fill="#5A2A1A"/>
+
+  <!-- 微笑嘴巴 -->
+  <path d="M192 176 Q200 183 208 176" stroke="#CC2A1A" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- 文字：国药Claw（和国药集团字体风格对齐，位置和大小还原） -->
+  <text x="200" y="365" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="55" font-weight="bold" fill="#1E4B9A" text-anchor="middle">国药Claw</text>
 </svg>
