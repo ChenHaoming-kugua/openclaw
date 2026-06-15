@@ -1,0 +1,16 @@
+{
+  "name": "@openclaw/ecode-diagnose",
+  "version": "2026.6.2",
+  "private": true,
+  "description": "Diagnose why drug traceability codes (追溯码) haven't been uploaded to the AliHealth 码上放心 platform",
+  "type": "module",
+  "dependencies": {
+    "typebox": "1.1.39"
+  },
+  "devDependencies": {
+    "@openclaw/plugin-sdk": "workspace:*"
+  },
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  }
+}

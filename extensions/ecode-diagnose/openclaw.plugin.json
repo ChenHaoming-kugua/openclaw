@@ -1,0 +1,50 @@
+{
+  "id": "ecode-diagnose",
+  "activation": {
+    "onStartup": true
+  },
+  "enabledByDefault": true,
+  "name": "追溯码上传诊断",
+  "description": "诊断零售追溯码未上传至码上放心平台的原因。逐项检查：商品是否启用追溯码、门店是否配置同步、区域是否匹配、采集记录是否存在、是否已被同步/标记异常等。",
+  "skills": ["./skills"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "medAiAgentBaseUrl": {
+        "type": "string",
+        "default": "http://localhost:8080",
+        "description": "med_ai_agent 后端地址"
+      }
+    },
+    "additionalProperties": false
+  },
+  "uiHints": {
+    "medAiAgentBaseUrl": {
+      "label": "med_ai_agent 地址",
+      "help": "med_ai_agent Spring Boot 后端的 base URL，用于调用追溯码诊断 API"
+    }
+  },
+  "version": "2026.6.2",
+  "contracts": {
+    "tools": [
+      "ecode_diagnose",
+      "ecode_diagnose_by_code",
+      "ecode_diagnose_batch",
+      "ecode_diagnose_stats"
+    ]
+  },
+  "toolMetadata": {
+    "ecode_diagnose": {
+      "optional": true
+    },
+    "ecode_diagnose_by_code": {
+      "optional": true
+    },
+    "ecode_diagnose_batch": {
+      "optional": true
+    },
+    "ecode_diagnose_stats": {
+      "optional": true
+    }
+  }
+}

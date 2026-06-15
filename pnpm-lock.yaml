@@ -714,6 +714,16 @@ importers:
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
+  extensions/ecode-diagnose:
+    dependencies:
+      typebox:
+        specifier: 1.1.39
+        version: 1.1.39
+    devDependencies:
+      '@openclaw/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+
   extensions/elevenlabs:
     devDependencies:
       '@openclaw/plugin-sdk':
@@ -3026,13 +3036,6 @@ packages:
 
   '@node-llama-cpp/linux-x64-cuda@3.18.1':
     resolution: {integrity: sha512-qOaYP4uwsUoBHQ/7xSOvyJIuXapS57Al+Sudgi00f96ldNZLKe1vuSGptAi5LTM2lIj66PKm6h8PlRWctwsZ2g==}
-    engines: {node: '>=20.0.0'}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-
-  '@node-llama-cpp/linux-x64-vulkan@3.18.1':
-    resolution: {integrity: sha512-SIaNTK5pUPhwJD0gmiQfHa8OrRctVMmnqu+slJrz2Mzgg/XrwFndJlS9hvc+jSjTXCouwf7sYeQaaJWvQgBh/A==}
     engines: {node: '>=20.0.0'}
     cpu: [x64]
     os: [linux]
@@ -8999,9 +9002,6 @@ snapshots:
   '@node-llama-cpp/linux-x64-cuda@3.18.1':
     optional: true
 
-  '@node-llama-cpp/linux-x64-vulkan@3.18.1':
-    optional: true
-
   '@node-llama-cpp/linux-x64@3.18.1':
     optional: true
 
@@ -12478,7 +12478,6 @@ snapshots:
       '@node-llama-cpp/linux-x64': 3.18.1
       '@node-llama-cpp/linux-x64-cuda': 3.18.1
       '@node-llama-cpp/linux-x64-cuda-ext': 3.18.1
-      '@node-llama-cpp/linux-x64-vulkan': 3.18.1
       '@node-llama-cpp/mac-arm64-metal': 3.18.1
       '@node-llama-cpp/mac-x64': 3.18.1
       '@node-llama-cpp/win-arm64': 3.18.1
