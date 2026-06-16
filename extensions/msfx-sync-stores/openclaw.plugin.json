@@ -1,0 +1,45 @@
+{
+  "id": "msfx-sync-stores",
+  "activation": {
+    "onStartup": true
+  },
+  "enabledByDefault": true,
+  "name": "码上放心门店同步",
+  "description": "把码上放心导出的连锁企业绑定详情 Excel 同步到 MSFX 数据库 ALI_HEALTH_SYNC_STORE_D 表。读 Excel → 调 med_ai_agent 比对 → 输出可人工审核的 SQL 文件，不直接执行。",
+  "skills": ["./skills"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "medAiAgentBaseUrl": {
+        "type": "string",
+        "default": "http://localhost:8080",
+        "description": "med_ai_agent 后端地址"
+      },
+      "pythonPath": {
+        "type": "string",
+        "default": "python",
+        "description": "Python 可执行文件路径，需要安装 openpyxl"
+      }
+    },
+    "additionalProperties": false
+  },
+  "uiHints": {
+    "medAiAgentBaseUrl": {
+      "label": "med_ai_agent 地址",
+      "help": "med_ai_agent Spring Boot 后端的 base URL"
+    },
+    "pythonPath": {
+      "label": "Python 路径",
+      "help": "用于解析 Excel，需要安装 openpyxl: pip install openpyxl"
+    }
+  },
+  "version": "2026.6.16",
+  "contracts": {
+    "tools": ["msfx_sync_stores_diagnose"]
+  },
+  "toolMetadata": {
+    "msfx_sync_stores_diagnose": {
+      "optional": true
+    }
+  }
+}
