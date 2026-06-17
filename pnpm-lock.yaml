@@ -1138,6 +1138,16 @@ importers:
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
+  extensions/msfx-sync-stores:
+    dependencies:
+      typebox:
+        specifier: 1.1.39
+        version: 1.1.39
+    devDependencies:
+      '@openclaw/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+
   extensions/msteams:
     dependencies:
       '@azure/identity':

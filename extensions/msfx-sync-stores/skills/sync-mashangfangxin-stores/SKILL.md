@@ -18,7 +18,14 @@ description: 把"码上放心"后台导出的"连锁企业绑定详情"Excel 同
 - "更新到码上放心同步表"
 - "帮我更新一下"
 
-## 工作流（只有 1 步）
+也可用于排查码上放心零售单据为什么未上传，例如用户给出：
+
+- 追溯码、单据号、单据细单号、零售流水总单号
+- "同样类型单子有的传上去了有的没传"
+- "对比已同步和未同步的码上放心单子"
+- 指定走 `runTaskQuanZhou` / `syncStoreSaleTraceCode` / `/data/sync/v2/syncStoreSaleTC`
+
+## 门店 Excel 同步工作流
 
 调 `msfx_sync_stores_diagnose` 工具：
 
@@ -45,6 +52,51 @@ description: 把"码上放心"后台导出的"连锁企业绑定详情"Excel 同
 - SQL 文件绝对路径
 - 处理摘要（数量分布 + PARENT_AREA 推断来源）
 - 强提示：**不要直接 COMMIT**，请用 SQL Developer 事务执行 + 跑验证查询 + 人工核对 PARENT_AREA 与 SKIP 列表后再 COMMIT
+
+## 零售单据未上传排查工作流
+
+如果用户要排查“已同步 / 未同步”零售追溯码单据，不要只看截图中的“单据细单号”和“单据业务日期”。当前代码实际链路是：
+
+1. 定时任务传 `syncAreaCode` / `parentAreaCode`，如泉州 `runTaskQuanZhou` 是 `161`，且 `12:00` 前直接 `return`。
+2. `syncStoreSaleTraceCode` 调 `posSetlService.getStoreSetlInfoList(placePointId, extMap)`。
+3. SQL 源表是 `gygdpos.gresa_sa_doc/gresa_sa_dtl`，日期窗口用 `GRESA_SA_DOC.CREDATE`，不是截图中的 `BMS_ECODE_RECORD.CREDATE`。
+4. 如果截图细单号来自订单销售管理 / 团购层，先查 `gygdpos.ZX_GROUP_BUY_DTL`：`GROUPBUYDTLID` 是截图细单号，`RSADTLID` 才是 `GRESA_SA_DTL.RSADTLID`。
+5. 追溯码关联条件必须同时考虑：`BMS_ECODE_RECORD.SOURCEID = GRESA_SA_DTL.RSADTLID` 或 `SOURCEID = ZX_GROUP_BUY_DTL.GROUPBUYDTLID`。
+6. 进入候选还要满足 `PUB_GOODS_AREA.ISECODE=1`、`STRONGCONTROL=1`、`SPECECODE=0`、追溯码数量等于 `GOODSQTY`，并且未出现在成功/异常/已售出/预校验异常表。
+
+### 表 owner 规则
+
+代码里部分 SQL 不带 schema，MSFX 连接用户下实际落表是：
+
+- 成功上传：`MSFX.ALI_HEALTH_ECODE_SYNC_D`
+- 请求日志：`MSFX.ALI_HEALTH_SYNC_REQUSET_LOG`
+- 已售出码：`MSFX.ALI_HEALTH_ALREADY_SALE_ECODE`
+- 异常码：`MSFX.ALI_HEALTH_ABNORMAL_ECODE`
+- 预校验异常：`MSFX.ALI_SYNC_ECODE_ABNORMAL_DATA`
+- 源单/追溯码/门店映射：`gygdpos.GRESA_SA_DOC`、`gygdpos.GRESA_SA_DTL`、`gygdpos.BMS_ECODE_RECORD`、`gygdpos.ALI_HEALTH_SYNC_STORE_D`
+
+不要误查 `gygdpos.ALI_HEALTH_ECODE_SYNC_D` 来判断当前代码是否已上传。
+
+### 后端辅助接口
+
+可调用 `med_ai_agent`：
+
+```http
+POST /api/msfx-sync/retail-diagnosis-sql
+Content-Type: application/json
+
+{
+  "parentAreaCode": "161",
+  "placepointId": "106016",
+  "screenshotDetailIds": ["25308471", "25308472"],
+  "realDetailIds": ["2973263763", "2973263764"],
+  "businessDate": "2026-06-16",
+  "rsaid": "1216350238",
+  "traceCodes": ["84401580005906179487"]
+}
+```
+
+接口只生成排查 SQL，不执行写操作。返回的 SQL 应按顺序验证：截图细单映射、真实销售单时间、追溯码关联、日期窗口、完整候选 SQL、成功表/请求日志/异常表。
 
 ## 多文件场景
 
