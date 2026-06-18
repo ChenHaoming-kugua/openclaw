@@ -1,0 +1,45 @@
+{
+  "id": "pos-git-review",
+  "activation": {
+    "onStartup": true
+  },
+  "enabledByDefault": true,
+  "name": "POS Git 代码 Review",
+  "description": "根据 gygd_pos 的 git commit/branch/tag 生成代码 review 与 POS 修改建议，只给反馈，不实际修改代码。",
+  "skills": ["./skills"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "medAiAgentBaseUrl": {
+        "type": "string",
+        "default": "http://localhost:8080",
+        "description": "med_ai_agent 后端地址"
+      },
+      "defaultPosRepoPath": {
+        "type": "string",
+        "default": "C:/Users/haoming/IdeaProjects/gygd_pos",
+        "description": "默认 gygd_pos 仓库路径"
+      }
+    },
+    "additionalProperties": false
+  },
+  "uiHints": {
+    "medAiAgentBaseUrl": {
+      "label": "med_ai_agent 地址",
+      "help": "med_ai_agent Spring Boot 后端的 base URL"
+    },
+    "defaultPosRepoPath": {
+      "label": "POS 仓库路径",
+      "help": "默认用于 review 的 gygd_pos 本地仓库路径"
+    }
+  },
+  "version": "2026.6.18",
+  "contracts": {
+    "tools": ["pos_git_review"]
+  },
+  "toolMetadata": {
+    "pos_git_review": {
+      "optional": true
+    }
+  }
+}

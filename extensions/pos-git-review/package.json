@@ -1,0 +1,16 @@
+{
+  "name": "@openclaw/pos-git-review",
+  "version": "2026.6.18",
+  "private": true,
+  "description": "根据 gygd_pos 的 git 版本号生成 POS 代码 review 与修改建议，不实际修改代码",
+  "type": "module",
+  "dependencies": {
+    "typebox": "1.1.39"
+  },
+  "devDependencies": {
+    "@openclaw/plugin-sdk": "workspace:*"
+  },
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  }
+}
