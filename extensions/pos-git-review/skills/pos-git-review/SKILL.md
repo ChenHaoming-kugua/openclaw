@@ -21,22 +21,16 @@ description: 根据 gygd_pos / POS 项目的 git 版本号、commit hash、branc
 
 ## 工作流
 
-优先调用 `pos_git_review` 工具：
-
-```json
-{
-  "ref": "516cb624485401f504c81e87b31396580405f2cd",
-  "baseRef": "可选，不传则 review 单个 commit 的 ^! diff",
-  "repoPath": "可选，默认 C:/Users/haoming/IdeaProjects/gygd_pos",
-  "requirement": "可选，用户提供的需求背景或重点关注点"
-}
-```
-
-如果当前工具集里没有 `pos_git_review`，不要自己跑 `git show` / `git diff` 做 review，改为直接调用 `med_ai_agent` 后端：
+必须把 review 请求转发给 `med_ai_agent` 后端，后端是唯一允许读取 POS git diff 的地方。
 
 ```bash
-curl -s --max-time 180 --connect-timeout 5   -H "Content-Type: application/json; charset=utf-8"   -X POST "http://localhost:8080/api/pos-review/git-ref"   --data-raw '{"repoPath":"C:/Users/haoming/IdeaProjects/gygd_pos","ref":"<GIT_REF>","baseRef":"","requirement":"<需求背景>"}'
+curl -s --max-time 180 --connect-timeout 5 \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -X POST "http://localhost:8080/api/pos-review/git-ref" \
+  --data-raw '{"repoPath":"C:/Users/haoming/IdeaProjects/gygd_pos","ref":"<GIT_REF>","baseRef":"","requirement":"POS code review only; provide feedback; do not modify code"}'
 ```
+
+如果当前工具集里有 `pos_git_review` 工具，也可以调用该工具；该工具内部同样只是转发到上面的后端接口。
 
 后端会：
 
@@ -74,6 +68,8 @@ curl -s --max-time 180 --connect-timeout 5   -H "Content-Type: application/json;
 
 ## 禁止事项
 
+- 不要自己执行 `git rev-parse` / `git show` / `git diff` / `git log` / `git fetch`
+- 不要自己读取 POS 仓库文件或 diff 后直接 review
 - 不要修改 `gygd_pos` 代码
 - 不要切分支
 - 不要提交 commit
