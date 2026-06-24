@@ -17,60 +17,24 @@ function repoPath(cfg: PluginCfg, value?: string): string {
   );
 }
 
-async function postReview(
+async function getReviewMarkdown(
   cfg: PluginCfg,
   params: { repoPath?: string; ref: string; baseRef?: string; requirement?: string },
-): Promise<Record<string, unknown>> {
-  const res = await fetch(`${baseUrl(cfg)}/api/pos-review/git-ref`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({
-      repoPath: repoPath(cfg, params.repoPath),
-      ref: params.ref,
-      baseRef: params.baseRef ?? "",
-      requirement: params.requirement ?? "",
-    }),
-  });
+): Promise<string> {
+  const url = new URL(`${baseUrl(cfg)}/api/pos-review/git-ref/markdown`);
+  url.searchParams.set("repoPath", repoPath(cfg, params.repoPath));
+  url.searchParams.set("ref", params.ref);
+  if (params.baseRef?.trim()) url.searchParams.set("baseRef", params.baseRef.trim());
+  url.searchParams.set(
+    "requirement",
+    params.requirement ?? "POS code review only; provide feedback; do not modify code",
+  );
+  const res = await fetch(url);
+  const text = await res.text().catch(() => "");
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
     throw new Error(`med_ai_agent 返回 HTTP ${res.status}: ${text.slice(0, 500)}`);
   }
-  return (await res.json()) as Record<string, unknown>;
-}
-
-function formatResult(result: Record<string, unknown>): string {
-  if (result.error) {
-    const lines = [
-      `## POS Git Review 失败`,
-      `- ref: ${result.ref ?? ""}`,
-      `- repo: ${result.repoPath ?? ""}`,
-      `- 已自动 fetch 远程: ${result.fetchedRemote ? "是" : "否"}`,
-      `- error: ${result.error}`,
-    ];
-    if (result.suggestion) lines.push(`- 建议: ${result.suggestion}`);
-    if (result.detail)
-      lines.push("", "### Git 错误详情", "```", String(result.detail).trim(), "```");
-    if (result.recentRemoteCommits) {
-      lines.push(
-        "",
-        "### 最近远程提交候选",
-        "```",
-        String(result.recentRemoteCommits).trim(),
-        "```",
-      );
-    }
-    return lines.join("\n");
-  }
-  const lines: string[] = [];
-  lines.push(`## POS Git Review 报告`);
-  lines.push(`- repo: ${result.repoPath}`);
-  lines.push(`- ref: ${result.ref}`);
-  if (result.baseRef) lines.push(`- baseRef: ${result.baseRef}`);
-  lines.push(`- diffRange: ${result.diffRange}`);
-  if (result.truncated) lines.push("- 注意: diff 已截断，必要时请人工补充查看完整变更");
-  lines.push("");
-  lines.push(String(result.review ?? ""));
-  return lines.join("\n");
+  return text;
 }
 
 export const posGitReviewToolDef = {
@@ -109,10 +73,10 @@ export function createPosGitReviewTool(cfg: PluginCfg) {
       _id: string,
       params: { ref: string; baseRef?: string; repoPath?: string; requirement?: string },
     ) {
-      const result = await postReview(cfg, params);
+      const text = await getReviewMarkdown(cfg, params);
       return {
-        content: [{ type: "text", text: formatResult(result) }],
-        details: { json: result },
+        content: [{ type: "text", text }],
+        details: { ref: params.ref, baseRef: params.baseRef ?? "" },
       };
     },
   };

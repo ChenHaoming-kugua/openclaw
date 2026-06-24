@@ -11,6 +11,24 @@ metadata: { "openclaw": { "requires": { "bins": ["curl"] } } }
 - 导数据、导出数据、统计数据、运营数据、销售数据
 - 门店数、SKU、追溯码、处方、促销、库存
 
+## 专用统计接口优先
+
+用户问“本周消费者最喜欢购买的 OTC 和处方药”“本周 OTC/处方药热销排行”“OTC 和处方药分别买得最多的是什么”时，必须直接调用后端专用接口，不要查询线上平台、行业榜单，也不要自己拼外部数据：
+
+```bash
+curl -s "http://localhost:8080/api/stats/weekly-drug-preference?limit=10"
+```
+
+PowerShell 不要直接用 `Invoke-RestMethod` 展示中文，旧版 PowerShell 可能把 UTF-8 JSON 解成乱码。必须用下面方式按 UTF-8 字节解码：
+
+```powershell
+$url = "http://localhost:8080/api/stats/weekly-drug-preference?limit=10"
+$json = [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri $url -UseBasicParsing).RawContentStream.ToArray())
+$json | ConvertFrom-Json
+```
+
+返回中的 `otcTop` 和 `prescriptionTop` 是分别的第一名，`otcRanking` 和 `prescriptionRanking` 是排行明细。把后端结果整理成中文即可。
+
 ## 第一步：获取可用指标列表
 
 ```bash

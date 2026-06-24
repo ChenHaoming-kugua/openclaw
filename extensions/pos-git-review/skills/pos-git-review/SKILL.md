@@ -25,9 +25,7 @@ description: 根据 gygd_pos / POS 项目的 git 版本号、commit hash、branc
 
 ```bash
 curl -s --max-time 180 --connect-timeout 5 \
-  -H "Content-Type: application/json; charset=utf-8" \
-  -X POST "http://localhost:8080/api/pos-review/git-ref" \
-  --data-raw '{"repoPath":"C:/Users/haoming/IdeaProjects/gygd_pos","ref":"<GIT_REF>","baseRef":"","requirement":"POS code review only; provide feedback; do not modify code"}'
+  "http://localhost:8080/api/pos-review/git-ref/markdown?repoPath=C%3A%2FUsers%2Fhaoming%2FIdeaProjects%2Fgygd_pos&ref=<GIT_REF>&requirement=POS%20code%20review%20only%3B%20provide%20feedback%3B%20do%20not%20modify%20code"
 ```
 
 如果当前工具集里有 `pos_git_review` 工具，也可以调用该工具；该工具内部同样只是转发到上面的后端接口。
