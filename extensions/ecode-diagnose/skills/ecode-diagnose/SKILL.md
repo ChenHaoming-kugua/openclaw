@@ -29,11 +29,22 @@ curl -s --max-time 30 --connect-timeout 5 "http://localhost:8080/api/ecode/diagn
 curl -s "http://localhost:8080/api/ecode/diagnose?placepointid=<STORE_ID>&rsadtlid=<DETAIL_ID>"
 ```
 
-### If the user provides a store ID + date range (batch diagnosis):
+### If the user asks for unsynced detail lines by store ID + date range:
 
 ```bash
 curl -s --max-time 30 --connect-timeout 5 "http://localhost:8080/api/ecode/diagnose/batch?placepointid=<STORE_ID>&beginTime=2026-06-01&endTime=2026-06-09"
 ```
+
+For requests like "列出未同步单据明细，包括商品id、追溯码、未同步原因", use this batch endpoint and reply directly from `details` as a compact list/table with columns:
+
+- `rsadtlid` 单据明细ID
+- `rsaid` 单据ID
+- `goodsid` 商品ID
+- `goodsname` 商品名
+- `traceCode` 追溯码
+- `reason` 未同步原因
+
+Also mention the counts: `unsentCount`, `noEcodeRecord`, `hasEcodeButNotUploaded`. Do not run stats first unless the user asks for overview; batch already returns the detail list.
 
 ### For upload statistics overview:
 
@@ -58,7 +69,60 @@ Common failure reasons:
 - "商品未启用追溯码" — the goods isn't flagged for ecode tracking
 - "门店未配置码上放心同步" — the store isn't in ali_health_sync_store_d
 - "已成功同步过" — already uploaded, no action needed
-- "记录在 ALI_HEALTH_ABNORMAL_ECODE 中" — previously detected as abnormal (unactivated/expired/invalid format)
+- "记录在 MSFX.ALI_HEALTH_ABNORMAL_ECODE 中" — previously detected as abnormal (unactivated/expired/invalid format)
+
+**Batch result fields** (from /api/ecode/diagnose/batch):
+
+- `unsentCount` — total candidates found
+- `noEcodeRecord` — no BMS_ECODE_RECORD entry (was never scanned)
+- `alreadySyncedFalsePositive` — has REQUSET_LOG with success=1 (already uploaded, UI lag)
+- `hasEcodeButNotUploaded` — real unsynced items, further split by:
+  - `syncTriggered: false` → scheduler never triggered (调度层问题)
+  - `syncTriggered: true, syncSuccess: false` → API called but failed (接口调用失败)
+- Each detail item includes `requestLogId` and `syncTriggered`/`syncSuccess` flags
+
+## Three-step diagnostic methodology (三步诊断法)
+
+When diagnosing "why didn't this upload?", always follow these three steps:
+
+### Step 1: Eliminate false positives (去假阳)
+
+- Check `MSFX.ALI_HEALTH_ECODE_SYNC_D` — if record exists, it WAS uploaded (UI may show stale status)
+- Check `MSFX.ALI_HEALTH_SYNC_REQUSET_LOG` — if `response_success=1` but SYNC_D missing, it was uploaded successfully (SYNC_D write lag)
+- These are NOT real problems — report as "已上传，UI/查询延迟"
+
+### Step 2: Eliminate whitelisted items (去白名单)
+
+- Products with `strongcontrol=0` in ZX_AREA_GOODS_QUALITY or ZX_POINT_GOODS_QUALITY are NOT supposed to upload
+- Products in `gygdpos.special_ecode_goods` with `ecodetype IN (2,3,4,5,6)` are excluded
+- The batch API already filters these, so items in the result should be legitimate candidates
+
+### Step 3: Classify root cause (区分根因)
+
+For each remaining item, check `MSFX.ALI_HEALTH_SYNC_REQUSET_LOG` for `request_log_id = GDYFSA_{rsaid}{rsadtlid}`:
+
+| REQUSET_LOG           | Meaning                   | Root cause                                   | Action                                                       |
+| --------------------- | ------------------------- | -------------------------------------------- | ------------------------------------------------------------ |
+| **No record**         | Scheduler never triggered | 调度层: sync task didn't pick up this record | Check scheduler logs, timing, strong-control channel routing |
+| **Exists, success=0** | API was called but failed | 接口层: upload failed, check msg_info        | Look at the error message from AliHealth platform            |
+| **Exists, success=1** | Already uploaded          | 假阳性: UI delay / SYNC_D query missed it    | No action needed                                             |
+
+### Table schema rules
+
+Code queries must use the correct schema prefix. **Always prefix MSFX tables with `MSFX.`:**
+
+| Table              | Correct reference                    |
+| ------------------ | ------------------------------------ |
+| Upload success log | `MSFX.ALI_HEALTH_ECODE_SYNC_D`       |
+| Request log        | `MSFX.ALI_HEALTH_SYNC_REQUSET_LOG`   |
+| Already-sold codes | `MSFX.ALI_HEALTH_ALREADY_SALE_ECODE` |
+| Abnormal codes     | `MSFX.ALI_HEALTH_ABNORMAL_ECODE`     |
+| Precheck failures  | `MSFX.ALI_SYNC_ECODE_ABNORMAL_DATA`  |
+| Inbound upload log | `MSFX.ALI_HEALTH_PURCH_ECODE_D`      |
+
+GYGDPOS tables (BMS_ECODE_RECORD, GRESA_SA_DOC, GRESA_SA_DTL, ALI_HEALTH_SYNC_STORE_D, etc.) use the `gygdpos.` prefix.
+
+**Never query without the MSFX. prefix** — the JDBC default schema is GYGDPOS, and queries hitting GYGDPOS.ALI_HEALTH_ECODE_SYNC_D will return wrong/empty results.
 
 ## Workflow
 

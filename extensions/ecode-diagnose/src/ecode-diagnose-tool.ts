@@ -88,26 +88,48 @@ function formatBatchResult(result: Record<string, unknown>): string {
     return lines.join("\n");
   }
 
+  const alreadySyncedFalsePositive = (result.alreadySyncedFalsePositive as number) ?? 0;
+
   lines.push(`## 门店 ${result.placepointid} 追溯码上传诊断报告`);
   lines.push(`- 时间范围: ${result.beginTime} ~ ${result.endTime}`);
-  lines.push(`- 未上传记录数: ${result.unsentCount}`);
+  lines.push(`- 候选未上传记录数: ${result.unsentCount}`);
+  if (alreadySyncedFalsePositive > 0) {
+    lines.push(`- **假阳性(已上传,UI延迟): ${alreadySyncedFalsePositive}**`);
+    lines.push(`- **真实未上传: ${result.hasEcodeButNotUploaded}**`);
+  }
+  lines.push(`- 无采集记录: ${result.noEcodeRecord}`);
   lines.push(`- ${result.summary}`);
   lines.push("");
 
   const details = result.details as Array<Record<string, unknown>> | undefined;
   if (details && details.length > 0) {
-    lines.push("## 未上传明细列表");
+    lines.push("## 明细列表");
     lines.push("");
-    lines.push("| 明细ID | 零售单号 | 商品 | 销售时间 | 原因 |");
-    lines.push("|--------|----------|------|----------|------|");
+    lines.push("| 明细ID | 零售单号 | 商品 | 追溯码 | 强控 | 触发上传 | 原因 |");
+    lines.push("|--------|----------|------|--------|------|----------|------|");
     for (const d of details.slice(0, 50)) {
       const reason = (d.reason as string) ?? "";
-      const shortReason = reason.length > 60 ? reason.slice(0, 57) + "..." : reason;
-      lines.push(`| ${d.rsadtlid} | ${d.rsaid} | ${d.goodsname} | ${d.credate} | ${shortReason} |`);
+      const shortReason = reason.length > 50 ? reason.slice(0, 47) + "..." : reason;
+      const triggered = d.syncTriggered;
+      let triggerIcon: string;
+      if (triggered === undefined || triggered === null) {
+        triggerIcon = "-";
+      } else if (triggered) {
+        triggerIcon = d.syncSuccess ? "Y(OK)" : "Y(FAIL)";
+      } else {
+        triggerIcon = "N";
+      }
+      lines.push(
+        `| ${d.rsadtlid} | ${d.rsaid} | ${d.goodsname} | ${d.traceCode} | ${d.strongControl} | ${triggerIcon} | ${shortReason} |`,
+      );
     }
     if (details.length > 50) {
-      lines.push(`| ... | ... | ... | ... | 还有 ${details.length - 50} 条 ... |`);
+      lines.push(`| ... | ... | ... | ... | ... | ... | 还有 ${details.length - 50} 条 ... |`);
     }
+    lines.push("");
+    lines.push(
+      "**触发上传列说明**: `-`=无采集记录无需上传, `Y(OK)`=已触发且成功(假阳性), `Y(FAIL)`=已触发但失败, `N`=调度层未触发",
+    );
   }
 
   return lines.join("\n");
